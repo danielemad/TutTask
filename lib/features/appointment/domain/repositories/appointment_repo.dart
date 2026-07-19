@@ -9,5 +9,5 @@ abstract class AppointmentRepo {
   Future<Either<Failure, void>> bookAppointment({
     required AppointmentParams params,
   });
-  Future<Either<Failure, void>> cancelAppointment(String id);
+  Future<Either<Failure, void>> cancelAppointment(int id);
 }

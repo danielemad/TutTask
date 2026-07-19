@@ -4,20 +4,27 @@ import '../cache/cache_helper.dart';
 import 'api_consumer.dart';
 import 'end_points.dart';
 
+class AuthInterceptor extends Interceptor {
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final token = await CacheHelper().getData(key: "cachedToken");
+
+    if (token != null) {
+      options.headers["Authorization"] = "Bearer $token";
+    }
+
+    return handler.next(options);
+  }
+}
+
 class DioConsumer extends ApiConsumer {
   final Dio dio;
-
   DioConsumer({required this.dio}) {
     dio.options.baseUrl = EndPoints.baserUrl;
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          options.headers["Authorization"] =
-              await CacheHelper().getData(key: "cachedToken") ?? "";
-          handler.next(options);
-        },
-      ),
-    );
+    dio.interceptors.add(AuthInterceptor());
   }
 
   @override

@@ -15,6 +15,14 @@ class _AppointmentFormSheetState extends State<AppointmentFormSheet> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
+  late Future<List<DoctorOption>> doctorsFuture;
+
+  @override
+  initState() {
+    super.initState();
+    doctorsFuture = context.read<AppointmentCubit>().getDoctors();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<AppointmentCubit>();
@@ -47,7 +55,7 @@ class _AppointmentFormSheetState extends State<AppointmentFormSheet> {
 
           /// Doctors Dropdown
           FutureBuilder<List<DoctorOption>>(
-            future: cubit.getDoctors(),
+            future: doctorsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(

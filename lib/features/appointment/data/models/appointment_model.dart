@@ -9,8 +9,8 @@ class AppointmentModel extends AppointmentEntity {
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
     return AppointmentModel(
-      id: json['id'] as String,
-      doctorId: json['doctorId'] as String,
+      id: json['id'] as int?,
+      doctorId: json['doctorId'] as int,
       appointmentDate: DateTime.parse(json['appointmentDate'] as String),
     );
   }

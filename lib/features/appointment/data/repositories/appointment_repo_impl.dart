@@ -26,6 +26,7 @@ class AppointmentRepoImpl implements AppointmentRepo {
   }) async {
     try {
       await remoteDatasource.bookAppointment(params);
+      print("======================================");
       return Right(null);
     } catch (e) {
       return Left(Failure(errMessage: e.toString()));
@@ -33,7 +34,7 @@ class AppointmentRepoImpl implements AppointmentRepo {
   }
 
   @override
-  Future<Either<Failure, void>> cancelAppointment(String id) async {
+  Future<Either<Failure, void>> cancelAppointment(int id) async {
     try {
       await remoteDatasource.cancelAppointment(id);
       return Right(null);
@@ -50,7 +51,10 @@ class AppointmentRepoImpl implements AppointmentRepo {
         final appointments = repsonse
             .map((e) => AppointmentModel.fromJson(e))
             .toList();
+
         localDatasource.cacheAppointments(appointments);
+
+        print(appointments);
         return Right(appointments);
       } on ServerException catch (e) {
         return Left(Failure(errMessage: e.errorModel.errorMessage));

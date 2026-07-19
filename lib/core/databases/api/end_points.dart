@@ -13,11 +13,11 @@ class ApiKey {
   static const String roles = "roles";
   static const String token = "token";
   static const String password = "password";
-  static const String doctorId = "doctorId";
+  static const String doctorId = "id";
   static const String patientId = "patientId";
   static const String appointmentId = "appointmentId";
   static const String appointmentDate = "appointmentDate";
   static const String specialization = "specialization";
-  static const String doctorName = "doctorName";
+  static const String doctorName = "fullName";
   static const String id = "id";
 }

@@ -41,6 +41,8 @@ class AppointmentCubit extends Cubit<AppointmentState> {
         "https://laziness-delirious-swampland.ngrok-free.dev/api/Patient/Doctors",
       );
 
+      print(response);
+
       return (response as List)
           .map(
             (doctor) => DoctorOption.fromJson(doctor as Map<String, dynamic>),
@@ -96,7 +98,7 @@ class AppointmentCubit extends Cubit<AppointmentState> {
     }
   }
 
-  Future<bool> cancelAppointment(String id) async {
+  Future<bool> cancelAppointment(int id) async {
     try {
       final result = await _repository.cancelAppointment(id);
 

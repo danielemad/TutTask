@@ -19,7 +19,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _InfoTile(title: 'Doctor', value: appointment.doctorId),
+            _InfoTile(title: 'Doctor', value: appointment.doctorId.toString()),
             _InfoTile(title: 'Specialty', value: 'General Medicine'),
             _InfoTile(
               title: 'Date',
@@ -55,7 +55,7 @@ class AppointmentDetailsScreen extends StatelessWidget {
 
   Future<void> _cancelAppointment(BuildContext context) async {
     final cubit = context.read<AppointmentCubit>();
-    final success = await cubit.cancelAppointment(appointment.id ?? '');
+    final success = await cubit.cancelAppointment(appointment.id!);
 
     if (!context.mounted) {
       return;

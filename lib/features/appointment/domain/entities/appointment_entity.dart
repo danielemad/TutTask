@@ -1,6 +1,6 @@
 class AppointmentEntity {
-  String? id;
-  String doctorId;
+  int? id;
+  int doctorId;
   DateTime appointmentDate;
   String status;
   String? notes;
