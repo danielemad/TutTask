@@ -1,6 +1,7 @@
 import 'package:appointment_task/core/params/params.dart';
 import 'package:appointment_task/features/auth/data/repositories/auth_repo_impl.dart';
 import 'package:appointment_task/features/auth/domain/usecases/user_login.dart';
+import 'package:appointment_task/features/auth/domain/usecases/user_logout.dart';
 import 'package:appointment_task/features/auth/presentation/cubits/auth_states.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,11 +26,24 @@ class AuthCubit extends Cubit<AuthState> {
         localDatasource: AuthLocalDatasource(cache: CacheHelper()),
         networkInfo: NetworkInfoImpl(InternetConnection()),
       ),
-    ).call(userLoginParams: params);
+    )(userLoginParams: params);
 
     failureOrUser.fold(
       (failure) => emit(AuthFailure(errMessage: failure.errMessage)),
       (user) => emit(AuthSuccess(user: user)),
     );
+  }
+
+  void logOut() {
+    emit(AuthLogout());
+    UserLogout(
+      repo: AuthRepoImpl(
+        remoteDatasource: AuthRemoteDatasource(
+          apiConsumer: DioConsumer(dio: Dio()),
+        ),
+        localDatasource: AuthLocalDatasource(cache: CacheHelper()),
+        networkInfo: NetworkInfoImpl(InternetConnection()),
+      ),
+    )();
   }
 }

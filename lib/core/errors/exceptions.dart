@@ -97,7 +97,14 @@ ErrorModel _getErrorModel(DioException e) {
 
   if (response != null && response.data is Map<String, dynamic>) {
     return ErrorModel.fromJson(response.data);
+  } else if (response != null && response.data is String) {
+    return ErrorModel(
+      status: response.statusCode ?? 400,
+      errorMessage: response.data,
+    );
   }
+
+  print(e.error);
 
   return ErrorModel(
     status: response?.statusCode ?? 500,

@@ -19,27 +19,30 @@ class AppointmentDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _InfoTile(title: 'Doctor', value: appointment.doctorId.toString()),
-            _InfoTile(title: 'Specialty', value: 'General Medicine'),
+            _InfoTile(title: 'Doctor', value: appointment.doctor.fullName),
+            _InfoTile(
+              title: 'Specialty',
+              value: appointment.doctor.specialization,
+            ),
             _InfoTile(
               title: 'Date',
               value: appointment.appointmentDate.toIso8601String(),
             ),
-            _InfoTile(title: 'Status', value: appointment.status),
+            _InfoTile(title: 'Status', value: appointment.status.title),
             if (appointment.notes != null && appointment.notes!.isNotEmpty)
               _InfoTile(title: 'Notes', value: appointment.notes!),
             const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isCancelable
+                onPressed: appointment.canCancel
                     ? () => _cancelAppointment(context)
                     : null,
                 icon: const Icon(Icons.cancel_outlined),
                 label: const Text('Cancel Appointment'),
               ),
             ),
-            if (!isCancelable)
+            if (!appointment.canCancel)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(

@@ -8,7 +8,7 @@ class AppointmentRemoteDatasource {
   AppointmentRemoteDatasource(this._apiConsumer);
 
   Future<void> bookAppointment(AppointmentParams params) async {
-    final x = await _apiConsumer.post(
+    await _apiConsumer.post(
       EndPoints.bookAppointment,
       data: {
         "doctorId": params.doctorId,

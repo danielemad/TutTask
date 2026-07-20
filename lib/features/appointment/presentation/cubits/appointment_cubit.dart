@@ -1,60 +1,20 @@
 import 'package:appointment_task/core/databases/cache/cache_helper.dart';
 import 'package:appointment_task/features/appointment/data/datasources/appointment_local_datasource.dart';
+import 'package:appointment_task/features/appointment/domain/usecases/book_appointment.dart';
+import 'package:appointment_task/features/appointment/domain/usecases/cancel_appointment.dart';
+import 'package:appointment_task/features/appointment/domain/usecases/get_appointments.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../../../../core/connection/network_info.dart';
 import '../../../../core/databases/api/dio_consumer.dart';
-import '../../../../core/databases/api/end_points.dart';
 import '../../../../core/params/params.dart';
 import '../../data/datasources/appointment_remote_datasource.dart';
 import '../../data/repositories/appointment_repo_impl.dart';
 import 'appointemtn_states.dart';
 
-class DoctorOption {
-  const DoctorOption({
-    required this.id,
-    required this.name,
-    required this.specialty,
-  });
-
-  final String id;
-  final String name;
-  final String specialty;
-
-  factory DoctorOption.fromJson(Map<String, dynamic> json) {
-    return DoctorOption(
-      id: json[ApiKey.doctorId].toString(),
-      name: json[ApiKey.doctorName],
-      specialty: json[ApiKey.specialization],
-    );
-  }
-}
-
 class AppointmentCubit extends Cubit<AppointmentState> {
-  Future<List<DoctorOption>> getDoctors() async {
-    try {
-      final dio = DioConsumer(dio: Dio());
-
-      final response = await dio.get(
-        "https://laziness-delirious-swampland.ngrok-free.dev/api/Patient/Doctors",
-      );
-
-      print(response);
-
-      return (response as List)
-          .map(
-            (doctor) => DoctorOption.fromJson(doctor as Map<String, dynamic>),
-          )
-          .toList();
-    } on DioException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
-
   AppointmentCubit() : super(AppointmentInitial()) {
     _remoteDatasource = AppointmentRemoteDatasource(DioConsumer(dio: Dio()));
     _localDatasource = AppointmentLocalDatasource(CacheHelper());
@@ -72,7 +32,7 @@ class AppointmentCubit extends Cubit<AppointmentState> {
   Future<void> loadAppointments({bool refresh = false}) async {
     emit(AppointmentLoading());
 
-    final result = await _repository.getAppointments();
+    final result = await GetAppointments(_repository)();
 
     result.fold(
       (failure) => emit(AppointmentError(failure.errMessage)),
@@ -81,14 +41,17 @@ class AppointmentCubit extends Cubit<AppointmentState> {
   }
 
   Future<bool> bookAppointment({
-    required String doctorId,
+    required int doctorId,
     required DateTime appointmentDate,
   }) async {
     emit(AppointmentSubmitting());
 
     try {
-      await _remoteDatasource.bookAppointment(
-        AppointmentParams(doctorId: doctorId, appointmentDate: appointmentDate),
+      await BookAppointment(_repository)(
+        params: AppointmentParams(
+          doctorId: doctorId,
+          appointmentDate: appointmentDate,
+        ),
       );
       await loadAppointments(refresh: true);
       return true;
@@ -100,7 +63,7 @@ class AppointmentCubit extends Cubit<AppointmentState> {
 
   Future<bool> cancelAppointment(int id) async {
     try {
-      final result = await _repository.cancelAppointment(id);
+      final result = await CancelAppointment(_repository)(id);
 
       return result.fold(
         (failure) {

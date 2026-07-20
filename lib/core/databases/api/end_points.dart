@@ -5,6 +5,7 @@ class EndPoints {
   static const String bookAppointment = "Patient/Book/";
   static const String cancelAppointment = "Patient/Cancel/";
   static const String appointments = "Patient/MyAppointments/";
+  static const String doctors = "Patient/Doctors/";
 }
 
 class ApiKey {
@@ -13,11 +14,11 @@ class ApiKey {
   static const String roles = "roles";
   static const String token = "token";
   static const String password = "password";
-  static const String doctorId = "id";
-  static const String patientId = "patientId";
-  static const String appointmentId = "appointmentId";
   static const String appointmentDate = "appointmentDate";
   static const String specialization = "specialization";
   static const String doctorName = "fullName";
+  static const String doctor = "doctor";
+  static const String notes = "notes";
+  static const String status = "status";
   static const String id = "id";
 }

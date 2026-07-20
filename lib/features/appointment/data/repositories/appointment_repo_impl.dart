@@ -1,10 +1,10 @@
+import 'package:appointment_task/features/appointment/domain/entities/appointment_entity.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/connection/network_info.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/params/params.dart';
-import '../../domain/entities/appointment_entity.dart';
 import '../../domain/repositories/appointment_repo.dart';
 import '../datasources/appointment_local_datasource.dart';
 import '../datasources/appointment_remote_datasource.dart';
@@ -26,7 +26,6 @@ class AppointmentRepoImpl implements AppointmentRepo {
   }) async {
     try {
       await remoteDatasource.bookAppointment(params);
-      print("======================================");
       return Right(null);
     } catch (e) {
       return Left(Failure(errMessage: e.toString()));
@@ -53,9 +52,9 @@ class AppointmentRepoImpl implements AppointmentRepo {
             .toList();
 
         localDatasource.cacheAppointments(appointments);
-
         print(appointments);
-        return Right(appointments);
+        print("ALL APPOINTMENTS FROM API ======================");
+        return Right(appointments.map((item) => item.toEntity()).toList());
       } on ServerException catch (e) {
         return Left(Failure(errMessage: e.errorModel.errorMessage));
       }
@@ -63,7 +62,9 @@ class AppointmentRepoImpl implements AppointmentRepo {
       try {
         final cachedAppointments = await localDatasource
             .getCachedAppointments();
-        return Right(cachedAppointments);
+        return Right(
+          cachedAppointments.map((item) => item.toEntity()).toList(),
+        );
       } on CacheException catch (e) {
         return Left(Failure(errMessage: e.errorMessage));
       }

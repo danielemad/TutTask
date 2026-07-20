@@ -1,6 +1,5 @@
 import 'package:appointment_task/features/appointment/domain/entities/appointment_entity.dart';
 import 'package:flutter/material.dart';
-import '../../data/models/appointment_model.dart';
 
 class AppointmentCard extends StatelessWidget {
   const AppointmentCard({
@@ -15,7 +14,6 @@ class AppointmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPending = appointment.status.toLowerCase() == 'pending';
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -31,16 +29,12 @@ class AppointmentCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isPending
-                      ? theme.colorScheme.primaryContainer
-                      : theme.colorScheme.secondaryContainer,
+                  color: appointment.status.color.withAlpha(100),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
-                  isPending ? Icons.calendar_today : Icons.check_circle_outline,
-                  color: isPending
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.secondary,
+                  appointment.status.icon,
+                  color: appointment.status.color,
                 ),
               ),
               const SizedBox(width: 12),
@@ -49,13 +43,9 @@ class AppointmentCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      appointment.doctorId.toString(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      appointment.doctor.specialization,
+                      style: theme.textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 4),
-                    Text("general medicine", style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),
                     Text(
                       appointment.appointmentDate.toIso8601String(),
@@ -71,17 +61,13 @@ class AppointmentCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: isPending
-                      ? Colors.orange.shade50
-                      : Colors.green.shade50,
+                  color: appointment.status.color,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  appointment.status,
+                  appointment.status.title,
                   style: TextStyle(
-                    color: isPending
-                        ? Colors.orange.shade800
-                        : Colors.green.shade800,
+                    color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),

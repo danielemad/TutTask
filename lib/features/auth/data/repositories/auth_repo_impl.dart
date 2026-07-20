@@ -31,29 +31,22 @@ class AuthRepoImpl extends AuthRepo {
         final remoteUser = await remoteDatasource.userLogIn(
           userLoginParams: userLoginParams,
         );
-        await localDatasource.cacheToken(remoteUser.token);
+        await localDatasource.saveToken(
+          remoteUser.token,
+          DateTime.now().add(Duration(hours: 1)),
+        );
 
         return Right(remoteUser);
       } on ServerException catch (e) {
         return Left(Failure(errMessage: e.errorModel.errorMessage));
       }
     } else {
-      try {
-        final cachedToken = await localDatasource.getCachedToken();
-        if (cachedToken != null) {
-          return Right(
-            UserEntity(
-              email: "PATIENT EMAIL",
-              user: "PATIENT NAME",
-              role: UserRoles.Patient, // Assuming the cached user is a patient
-            ),
-          );
-        } else {
-          return Left(Failure(errMessage: "NOUSER"));
-        }
-      } on CacheException catch (e) {
-        return Left(Failure(errMessage: e.errorMessage));
-      }
+      return Left(Failure(errMessage: "No Internet Connection"));
     }
+  }
+
+  @override
+  void userLogOut() async {
+    await localDatasource.clearCachedToken();
   }
 }

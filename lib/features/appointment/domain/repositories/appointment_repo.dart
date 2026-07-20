@@ -1,8 +1,8 @@
+import 'package:appointment_task/features/appointment/domain/entities/appointment_entity.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../../core/params/params.dart';
-import '../entities/appointment_entity.dart';
 
 abstract class AppointmentRepo {
   Future<Either<Failure, List<AppointmentEntity>>> getAppointments();

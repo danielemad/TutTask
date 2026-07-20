@@ -1,4 +1,8 @@
 import 'package:appointment_task/features/appointment/domain/entities/appointment_entity.dart';
+import 'package:appointment_task/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:appointment_task/features/auth/presentation/cubits/auth_states.dart';
+import 'package:appointment_task/features/auth/presentation/screens/login_screen.dart';
+import 'package:appointment_task/features/doctor/presentation/cubits/doctor_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/appointemtn_states.dart';
@@ -13,8 +17,13 @@ class AppointmentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AppointmentCubit()..loadAppointments(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AppointmentCubit()..loadAppointments(),
+        ),
+        BlocProvider(create: (context) => DoctorCubit()..getDoctors()),
+      ],
       child: const _AppointmentsView(),
     );
   }
@@ -25,90 +34,109 @@ class _AppointmentsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Appointments'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<AppointmentCubit>().loadAppointments(
-              refresh: true,
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLogout) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('My Appointments'),
+            leading: IconButton(
+              onPressed: () {
+                BlocProvider.of<AuthCubit>(context).logOut();
+              },
+              icon: Icon(Icons.logout),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showBookingForm(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Book'),
-      ),
-      body: BlocBuilder<AppointmentCubit, AppointmentState>(
-        builder: (context, state) {
-          if (state is AppointmentLoading || state is AppointmentSubmitting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is AppointmentError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48),
-                    const SizedBox(height: 12),
-                    Text(
-                      state.message,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () => context
-                          .read<AppointmentCubit>()
-                          .loadAppointments(refresh: true),
-                      child: const Text('Try again'),
-                    ),
-                  ],
-                ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () => context
+                    .read<AppointmentCubit>()
+                    .loadAppointments(refresh: true),
               ),
-            );
-          }
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _showBookingForm(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Book'),
+          ),
+          body: BlocBuilder<AppointmentCubit, AppointmentState>(
+            builder: (context, state) {
+              if (state is AppointmentLoading ||
+                  state is AppointmentSubmitting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (state is AppointmentLoaded) {
-            final appointments = state.appointments;
+              if (state is AppointmentError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48),
+                        const SizedBox(height: 12),
+                        Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () => context
+                              .read<AppointmentCubit>()
+                              .loadAppointments(refresh: true),
+                          child: const Text('Try again'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
-            if (appointments.isEmpty) {
+              if (state is AppointmentLoaded) {
+                final appointments = state.appointments;
+
+                if (appointments.isEmpty) {
+                  return const EmptyStateWidget(
+                    title: 'No appointments yet',
+                    message:
+                        'You will see your booked appointments here after you create one.',
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () => context
+                      .read<AppointmentCubit>()
+                      .loadAppointments(refresh: true),
+                  child: ListView.builder(
+                    itemCount: appointments.length,
+                    itemBuilder: (context, index) {
+                      final appointment = appointments[index];
+                      return AppointmentCard(
+                        appointment: appointment,
+                        onTap: () => _openDetails(context, appointment),
+                      );
+                    },
+                  ),
+                );
+              }
+
               return const EmptyStateWidget(
                 title: 'No appointments yet',
-                message:
-                    'You will see your booked appointments here after you create one.',
+                message: 'Your scheduled appointments will appear here.',
               );
-            }
-
-            return RefreshIndicator(
-              onRefresh: () => context
-                  .read<AppointmentCubit>()
-                  .loadAppointments(refresh: true),
-              child: ListView.builder(
-                itemCount: appointments.length,
-                itemBuilder: (context, index) {
-                  final appointment = appointments[index];
-                  return AppointmentCard(
-                    appointment: appointment,
-                    onTap: () => _openDetails(context, appointment),
-                  );
-                },
-              ),
-            );
-          }
-
-          return const EmptyStateWidget(
-            title: 'No appointments yet',
-            message: 'Your scheduled appointments will appear here.',
-          );
-        },
-      ),
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -119,9 +147,12 @@ class _AppointmentsView extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (_) => BlocProvider.value(
-        value: context.read<AppointmentCubit>(),
-        child: const AppointmentFormSheet(),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AppointmentCubit>()),
+          BlocProvider.value(value: context.read<DoctorCubit>()),
+        ],
+        child: AppointmentFormSheet(),
       ),
     );
   }

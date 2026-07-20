@@ -1,3 +1,4 @@
+import 'package:appointment_task/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:dio/dio.dart';
 import '../../errors/exceptions.dart';
 import '../cache/cache_helper.dart';
@@ -10,10 +11,12 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await CacheHelper().getData(key: "cachedToken");
+    final token = await AuthLocalDatasource(
+      cache: CacheHelper(),
+    ).getCachedToken();
 
     if (token != null) {
-      options.headers["Authorization"] = "Bearer $token";
+      options.headers["Authorization"] = "Bearer ${token["token"]}";
     }
 
     return handler.next(options);

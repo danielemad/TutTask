@@ -8,4 +8,6 @@ abstract class AuthRepo {
   Future<Either<Failure, UserEntity>> userLogIn({
     required UserLoginParams userLoginParams,
   });
+
+  void userLogOut();
 }

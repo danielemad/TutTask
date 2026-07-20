@@ -12,12 +12,13 @@ class AuthRemoteDatasource {
     required UserLoginParams userLoginParams,
   }) async {
     final response = await _apiConsumer.post(
-      "${EndPoints.baserUrl}${EndPoints.login}",
+      EndPoints.login,
       data: {
         "email": userLoginParams.email,
         "password": userLoginParams.password,
       },
     );
+
     return UserModel.fromJson(response);
   }
 }

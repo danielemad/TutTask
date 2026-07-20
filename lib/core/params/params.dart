@@ -10,7 +10,7 @@ class UserLoginParams {
 }
 
 class AppointmentParams {
-  final String doctorId;
+  final int doctorId;
   final DateTime appointmentDate;
 
   AppointmentParams({required this.doctorId, required this.appointmentDate});
